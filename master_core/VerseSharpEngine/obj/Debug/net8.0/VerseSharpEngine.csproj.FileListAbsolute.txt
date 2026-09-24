@@ -1,0 +1,5 @@
+/workspaces/Renzoverse/VerseSharpEngine/obj/Debug/net8.0/VerseSharpEngine.GeneratedMSBuildEditorConfig.editorconfig
+/workspaces/Renzoverse/VerseSharpEngine/obj/Debug/net8.0/VerseSharpEngine.AssemblyInfoInputs.cache
+/workspaces/Renzoverse/VerseSharpEngine/obj/Debug/net8.0/VerseSharpEngine.AssemblyInfo.cs
+/workspaces/Renzoverse/VerseSharpEngine/obj/Debug/net8.0/VerseSharpEngine.csproj.CoreCompileInputs.cache
+/workspaces/Renzoverse/VerseSharpEngine/obj/Debug/net8.0/VerseSharpEngine.sourcelink.json
