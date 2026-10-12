@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VerseSharpEngine")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+14cae6a14d03bcf000f0b8c78f16316188421dcd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+44e35bd986fcd3d17999afc277328b69c81e8ad9")]
 [assembly: System.Reflection.AssemblyProductAttribute("VerseSharpEngine")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VerseSharpEngine")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

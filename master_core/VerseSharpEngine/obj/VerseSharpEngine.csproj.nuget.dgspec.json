@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/workspaces/Renzoverse/VerseSharpEngine/VerseSharpEngine.csproj": {}
+    "/workspaces/Renzoverse/master_core/VerseSharpEngine/VerseSharpEngine.csproj": {}
   },
   "projects": {
-    "/workspaces/Renzoverse/VerseSharpEngine/VerseSharpEngine.csproj": {
+    "/workspaces/Renzoverse/master_core/VerseSharpEngine/VerseSharpEngine.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/workspaces/Renzoverse/VerseSharpEngine/VerseSharpEngine.csproj",
+        "projectUniqueName": "/workspaces/Renzoverse/master_core/VerseSharpEngine/VerseSharpEngine.csproj",
         "projectName": "VerseSharpEngine",
-        "projectPath": "/workspaces/Renzoverse/VerseSharpEngine/VerseSharpEngine.csproj",
+        "projectPath": "/workspaces/Renzoverse/master_core/VerseSharpEngine/VerseSharpEngine.csproj",
         "packagesPath": "/home/codespace/.nuget/packages/",
-        "outputPath": "/workspaces/Renzoverse/VerseSharpEngine/obj/",
+        "outputPath": "/workspaces/Renzoverse/master_core/VerseSharpEngine/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/codespace/.nuget/NuGet/NuGet.Config"
@@ -59,15 +59,15 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.30, 8.0.30]"
+              "version": "[8.0.31, 8.0.31]"
             },
             {
               "name": "Microsoft.NETCore.App.Host.linux-x64",
-              "version": "[8.0.30, 8.0.30]"
+              "version": "[8.0.31, 8.0.31]"
             },
             {
               "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.30, 8.0.30]"
+              "version": "[8.0.31, 8.0.31]"
             }
           ],
           "frameworkReferences": {
@@ -75,7 +75,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.400/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.401/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
