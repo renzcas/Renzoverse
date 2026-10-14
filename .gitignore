@@ -1,0 +1,4 @@
+/shared/telemetry/cavesharp.json
+/shared/telemetry/cavesharp.json.*.tmp
+__pycache__/
+*.py[cod]

@@ -5,7 +5,7 @@
     "cavesharp": {
       "name": "CaveSharp-OS",
       "path": "modules/CaveSharp-OS/",
-      "runtime": ".NET 10.0",
+      "runtime": ".NET 8.0",
       "entry_point": "CaveSharpEngine.csproj",
       "telemetry_out": "shared/telemetry/cavesharp.json",
       "events_out": "shared/events/cavesharp_events.json"
