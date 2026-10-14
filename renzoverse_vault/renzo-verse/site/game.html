@@ -87,7 +87,7 @@
     </div>
     <p id="directive">Waiting for the CaveSharp world pulse.</p>
   </section>
-  <div class="hint">Click the world to look around · WASD to move · Esc to release the mouse</div>
+  <div class="hint">Click the world to look around · WASD to move · Shift to sprint · Esc to release the mouse</div>
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 
@@ -224,9 +224,15 @@
     let threat = 0;
     let corruption = 0;
     let yaw = 0;
+    let cameraYaw = 0;
     let pitch = 0;
+    let cameraPitch = 0;
     const keys = new Set();
     const clock = new THREE.Clock();
+    const moveDirection = new THREE.Vector3();
+    const movementVelocity = new THREE.Vector3();
+    const cameraTarget = new THREE.Vector3();
+    const cameraLookTarget = new THREE.Vector3();
 
     function updateCreatures(creatures) {
       while (creatureMarkers.length < creatures.length) {
@@ -294,7 +300,10 @@
     }
     connectTelemetry();
 
-    renderer.domElement.addEventListener('click', () => renderer.domElement.requestPointerLock());
+    renderer.domElement.addEventListener('click', () => {
+      if (document.pointerLockElement !== renderer.domElement)
+        renderer.domElement.requestPointerLock();
+    });
     document.addEventListener('pointerlockchange', () => {
       renderer.domElement.style.cursor = document.pointerLockElement === renderer.domElement ? 'none' : 'crosshair';
     });
@@ -304,7 +313,7 @@
       pitch = THREE.MathUtils.clamp(pitch - event.movementY * 0.0015, -0.35, 0.35);
     });
     document.addEventListener('keydown', (event) => {
-      if (['KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(event.code)) {
+      if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ShiftLeft', 'ShiftRight'].includes(event.code)) {
         keys.add(event.code);
         event.preventDefault();
       }
@@ -318,32 +327,61 @@
     });
 
     function animate() {
-      const elapsed = clock.getElapsedTime();
       const delta = Math.min(clock.getDelta(), 0.05);
-      const forwardX = -Math.sin(yaw);
-      const forwardZ = -Math.cos(yaw);
-      const rightX = Math.cos(yaw);
-      const rightZ = -Math.sin(yaw);
-      const speed = 4.2 * delta;
-      if (keys.has('KeyW')) { trog.position.x += forwardX * speed; trog.position.z += forwardZ * speed; }
-      if (keys.has('KeyS')) { trog.position.x -= forwardX * speed; trog.position.z -= forwardZ * speed; }
-      if (keys.has('KeyA')) { trog.position.x -= rightX * speed; trog.position.z -= rightZ * speed; }
-      if (keys.has('KeyD')) { trog.position.x += rightX * speed; trog.position.z += rightZ * speed; }
+      const elapsed = clock.elapsedTime;
+      const turnSmoothing = 1 - Math.exp(-12 * delta);
+      const followSmoothing = 1 - Math.exp(-7 * delta);
+      const movementSmoothing = 1 - Math.exp(-10 * delta);
+      const isMoving = keys.has('KeyW') || keys.has('KeyA') ||
+        keys.has('KeyS') || keys.has('KeyD');
+      const isSprinting = isMoving && (keys.has('ShiftLeft') || keys.has('ShiftRight'));
+
+      cameraYaw += Math.atan2(Math.sin(yaw - cameraYaw), Math.cos(yaw - cameraYaw)) * turnSmoothing;
+      cameraPitch += (pitch - cameraPitch) * turnSmoothing;
+
+      const forwardX = -Math.sin(cameraYaw);
+      const forwardZ = -Math.cos(cameraYaw);
+      const rightX = Math.cos(cameraYaw);
+      const rightZ = -Math.sin(cameraYaw);
+      moveDirection.set(0, 0, 0);
+      if (keys.has('KeyW')) { moveDirection.x += forwardX; moveDirection.z += forwardZ; }
+      if (keys.has('KeyS')) { moveDirection.x -= forwardX; moveDirection.z -= forwardZ; }
+      if (keys.has('KeyA')) { moveDirection.x -= rightX; moveDirection.z -= rightZ; }
+      if (keys.has('KeyD')) { moveDirection.x += rightX; moveDirection.z += rightZ; }
+      if (moveDirection.lengthSq() > 0) moveDirection.normalize();
+
+      const speed = isSprinting ? 6.2 : 3.8;
+      movementVelocity.x += (moveDirection.x * speed - movementVelocity.x) * movementSmoothing;
+      movementVelocity.z += (moveDirection.z * speed - movementVelocity.z) * movementSmoothing;
+      trog.position.x += movementVelocity.x * delta;
+      trog.position.z += movementVelocity.z * delta;
+
+      const previousX = trog.position.x;
+      const previousZ = trog.position.z;
       trog.position.x = THREE.MathUtils.clamp(trog.position.x, -15, 15);
       trog.position.z = THREE.MathUtils.clamp(trog.position.z, -15, 15);
-      trog.rotation.y = yaw;
-      trog.position.y = -4.5 + Math.sin(elapsed * 4) * 0.035;
+      if (trog.position.x !== previousX) movementVelocity.x = 0;
+      if (trog.position.z !== previousZ) movementVelocity.z = 0;
 
-      camera.position.set(
+      trog.rotation.y += Math.atan2(
+        Math.sin(cameraYaw - trog.rotation.y),
+        Math.cos(cameraYaw - trog.rotation.y)
+      ) * turnSmoothing;
+      const stride = Math.min(movementVelocity.length() / 3.8, 1);
+      trog.position.y = -4.5 + Math.sin(elapsed * (isSprinting ? 13 : 9)) * 0.035 * stride;
+
+      cameraTarget.set(
         trog.position.x - forwardX * 4.5,
         trog.position.y + 2.3,
         trog.position.z - forwardZ * 4.5
       );
-      camera.lookAt(
+      camera.position.lerp(cameraTarget, followSmoothing);
+      cameraLookTarget.set(
         trog.position.x + forwardX * 3,
-        trog.position.y + 1.5 + pitch * 5,
+        trog.position.y + 1.5 + cameraPitch * 5,
         trog.position.z + forwardZ * 3
       );
+      camera.lookAt(cameraLookTarget);
 
       const danger = THREE.MathUtils.clamp(threat / 150, 0, 1);
       caveLight.color.setHSL(0.1 - danger * 0.09, 0.65, 0.58);
