@@ -2,3 +2,5 @@
 /shared/telemetry/cavesharp.json.*.tmp
 __pycache__/
 *.py[cod]
+obj/
+bin/

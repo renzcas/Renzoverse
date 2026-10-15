@@ -29,9 +29,11 @@ In this Codespace, the newly installed .NET 8 SDK/runtime lives under `/usr/lib/
 
 ## Current telemetry contract
 
-CaveSharp targets .NET 8 and reads the telemetry output path and sync interval from `renzoverse.json`. It atomically refreshes the latest JSON snapshot at `shared/telemetry/cavesharp.json` and broadcasts the same state over `ws://localhost:8181/telemetry/`. The cave page displays the live threat, corruption, CTA, and creature data.
+CaveSharp targets .NET 8 and broadcasts its telemetry JSON over `ws://localhost:8181/telemetry/`. The cave page consumes that WebSocket stream directly to display threat, corruption, CTA, and creature data. Creature fields are serialized in camel case to match the browser contract.
 
-The `events_out` path is declared but is not yet written. The Python organ contract and discovery registry are implemented; concrete organ engines, cross-language invocation, event output, and additional worlds remain future work.
+`renzoverse.json` declares a telemetry output path and sync interval, but the pinned CaveSharp source does not currently read that configuration or write `shared/telemetry/cavesharp.json`; that file-based handoff is not implemented yet. The `events_out` path is also reserved. The Python organ contract and discovery registry are implemented; concrete organ engines, cross-language invocation, event output, and additional worlds remain future work.
+
+The pinned CaveSharp source currently has unrelated compile errors, so the run command above will not start until those are repaired.
 
 ## Discover and call Python organs
 

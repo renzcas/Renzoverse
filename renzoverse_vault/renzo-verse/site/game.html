@@ -84,6 +84,7 @@
       <div class="stat"><span class="label">Corruption</span><strong id="corruption" class="value">—</strong></div>
       <div class="stat"><span class="label">CTA aggression</span><strong id="cta" class="value">—</strong></div>
       <div class="stat"><span class="label">Creatures</span><strong id="creatures" class="value">—</strong></div>
+      <div class="stat"><span class="label">Average hunger</span><strong id="hunger" class="value">—</strong></div>
     </div>
     <p id="directive">Waiting for the CaveSharp world pulse.</p>
   </section>
@@ -97,6 +98,7 @@
     const corruptionValue = document.querySelector('#corruption');
     const ctaValue = document.querySelector('#cta');
     const creatureValue = document.querySelector('#creatures');
+    const hungerValue = document.querySelector('#hunger');
     const directiveValue = document.querySelector('#directive');
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -285,6 +287,12 @@
           ctaValue.textContent = `${(Number(state.cta) || 0).toFixed(0)}%`;
           const creatures = Array.isArray(state.creatures) ? state.creatures : [];
           creatureValue.textContent = creatures.length.toString();
+          const hungerLevels = creatures
+            .map((creature) => creature.hunger)
+            .filter((hunger) => typeof hunger === 'number' && Number.isFinite(hunger));
+          hungerValue.textContent = hungerLevels.length
+            ? `${(hungerLevels.reduce((total, hunger) => total + hunger, 0) / hungerLevels.length).toFixed(0)}%`
+            : '—';
           directiveValue.textContent = `${state.ctaBoss || 'CaveSharp'}: ${state.directive || 'No active directive'}`;
           updateCreatures(creatures);
         } catch (error) {
