@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:renzoverse:spine:module:v1",
+  "title": "Renzoverse Module Manifest",
+  "description": "Discoverable module metadata and declared compatibility; this manifest does not itself imply that a module is healthy or running.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "moduleId",
+    "displayName",
+    "version",
+    "source",
+    "capabilities",
+    "contracts"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "moduleId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Module release version."
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "repository"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "contracts": {
+      "type": "array",
+      "description": "Exact contract identifiers and supported versions, for example urn:renzoverse:spine:telemetry:v1@1.0.0.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "healthEndpoint": {
+      "type": "string",
+      "format": "uri"
+    },
+    "entrypoints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "additionalProperties": true
+}

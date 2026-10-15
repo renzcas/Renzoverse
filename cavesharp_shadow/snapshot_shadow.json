@@ -1,0 +1,95 @@
+{
+  "artifact": "CaveSharp telemetry snapshot shadow",
+  "shadowVersion": "1.0.0",
+  "pillar": "CaveSharp-OS",
+  "pinnedRevision": "6d4efc9d2753a11b4680a4969eb6041b65d39b22",
+  "status": "source-shape-observed; successful pinned runtime emission unverified",
+  "sourceEvidence": [
+    {
+      "path": "modules/CaveSharp-OS/MetaAI/Overseer.cs",
+      "revisionState": "pinned",
+      "observation": "BroadcastState serializes an anonymous root object using System.Text.Json.JsonSerializer.Serialize."
+    },
+    {
+      "path": "modules/CaveSharp-OS/Telemetry/WebSocketServer.cs",
+      "revisionState": "pinned",
+      "observation": "SendToAll sends the supplied JSON string to connected WebSocket clients; it does not validate a schema."
+    },
+    {
+      "path": "modules/CaveSharp-OS/MetaAI/Overseer.cs",
+      "revisionState": "local-worktree-modified",
+      "observation": "Local edit calls TelemetrySnapshotSerializer.Serialize."
+    },
+    {
+      "path": "modules/CaveSharp-OS/Telemetry/TelemetrySnapshot.cs",
+      "revisionState": "local-worktree-untracked",
+      "observation": "Local serializer uses JsonSerializerDefaults.Web and converts the 2D corruption array into jagged arrays."
+    }
+  ],
+  "pinnedAttemptedRootShape": [
+    {
+      "field": "threat",
+      "source": "Overseer.GlobalThreatLevel",
+      "sourceType": "integer",
+      "contractPath": "$.threat",
+      "status": "legacy-overlap"
+    },
+    {
+      "field": "cta",
+      "source": "CTABoss.AggressionLevel",
+      "sourceType": "number",
+      "contractPath": "$.cta",
+      "status": "legacy-overlap"
+    },
+    {
+      "field": "corruption",
+      "source": "CorruptionMap.SpreadIntensity",
+      "sourceType": "number",
+      "contractPath": "$.corruption",
+      "status": "legacy-overlap; unit/range semantics require confirmation"
+    },
+    {
+      "field": "creatures",
+      "source": "CreatureManager.GetSnapshot()",
+      "sourceType": "array of CreatureSnapshot",
+      "contractPath": "$.creatures",
+      "status": "shape/type mismatch and pinned build mismatch; see creature_shadow.json"
+    },
+    {
+      "field": "ctaBoss",
+      "source": "CTABoss.Name",
+      "sourceType": "string",
+      "contractPath": "$.ctaBoss",
+      "status": "legacy-overlap"
+    },
+    {
+      "field": "directive",
+      "source": "Overseer.GetDirective()",
+      "sourceType": "string",
+      "contractPath": "$.directive",
+      "status": "legacy-overlap"
+    },
+    {
+      "field": "corruptionGrid",
+      "source": "CorruptionMap.GetGrid()",
+      "sourceType": "float[,]",
+      "contractPath": "$.corruptionGrid",
+      "status": "serializer compatibility unverified; System.Text.Json does not serialize multidimensional arrays by default"
+    }
+  ],
+  "missingContractEnvelopeFields": [
+    "schemaVersion",
+    "worldId",
+    "tick",
+    "generatedAt"
+  ],
+  "targetContract": "urn:renzoverse:spine:telemetry:v1",
+  "adapterRequirements": [
+    "Use authoritative configured worldId, simulation tick, and snapshot timestamp.",
+    "Supply stable creature entity IDs from an explicit identity source.",
+    "Map the nested creature payload to the canonical field casing and required fields.",
+    "Convert the corruption grid to a supported JSON array shape only after axis and unit semantics are documented.",
+    "Validate the complete snapshot against the checked-in telemetry schema before publication."
+  ],
+  "runtimeEmissionVerified": false
+}

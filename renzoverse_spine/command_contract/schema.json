@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:renzoverse:spine:command:v1",
+  "title": "Renzoverse Command",
+  "description": "A command request or its explicit result. Commands are separate from telemetry and must be validated and audited by the engine.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/result"
+    }
+  ],
+  "$defs": {
+    "request": {
+      "type": "object",
+      "required": [
+        "messageType",
+        "schemaVersion",
+        "commandId",
+        "worldId",
+        "actorId",
+        "commandType",
+        "requestedAt",
+        "payload"
+      ],
+      "properties": {
+        "messageType": {
+          "const": "command"
+        },
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "commandId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "worldId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "actorId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Authenticated user or service identity supplied by the transport layer."
+        },
+        "commandType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requestedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "payload": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": true
+    },
+    "result": {
+      "type": "object",
+      "required": [
+        "messageType",
+        "schemaVersion",
+        "commandId",
+        "worldId",
+        "status",
+        "respondedAt"
+      ],
+      "properties": {
+        "messageType": {
+          "const": "commandResult"
+        },
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "commandId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "worldId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "accepted",
+            "rejected",
+            "completed"
+          ]
+        },
+        "respondedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "result": {
+          "type": "object"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

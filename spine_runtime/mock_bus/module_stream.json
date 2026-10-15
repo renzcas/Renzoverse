@@ -1,0 +1,38 @@
+[
+  {
+    "schemaVersion": "1.0.0",
+    "moduleId": "renzoverse.mock.viewer",
+    "displayName": "Renzoverse Mock Viewer Client",
+    "version": "0.1.0",
+    "source": {
+      "repository": "local-fixture"
+    },
+    "capabilities": [
+      "telemetry.consume",
+      "world.consume"
+    ],
+    "contracts": [
+      "urn:renzoverse:spine:telemetry:v1@1.0.0",
+      "urn:renzoverse:spine:world:v1@1.0.0",
+      "urn:renzoverse:spine:module:v1@1.0.0"
+    ]
+  },
+  {
+    "schemaVersion": "1.0.0",
+    "moduleId": "cavesharp.mock",
+    "displayName": "CaveSharp Mock Producer",
+    "version": "0.1.0",
+    "source": {
+      "repository": "local-fixture"
+    },
+    "capabilities": [
+      "telemetry.produce",
+      "event.produce"
+    ],
+    "contracts": [
+      "urn:renzoverse:spine:telemetry:v1@1.0.0",
+      "urn:renzoverse:spine:event:v1@1.0.0",
+      "urn:renzoverse:spine:module:v1@1.0.0"
+    ]
+  }
+]

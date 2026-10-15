@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:renzoverse:spine:telemetry:v1",
+  "title": "Renzoverse Telemetry Snapshot",
+  "description": "A complete point-in-time world state snapshot. The current flat CaveSharp payload is a legacy shape until it adds the required envelope metadata.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "worldId",
+    "tick",
+    "generatedAt",
+    "threat",
+    "cta",
+    "corruption",
+    "ctaBoss",
+    "directive",
+    "creatures",
+    "corruptionGrid"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "worldId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable ID from the world catalog."
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when this snapshot was generated."
+    },
+    "threat": {
+      "type": "number",
+      "description": "World threat value; unit/range must be documented by the producing module."
+    },
+    "cta": {
+      "type": "number",
+      "description": "CTA value; unit/range must be documented by the producing module."
+    },
+    "corruption": {
+      "type": "number",
+      "description": "Corruption value; unit/range must be documented by the producing module."
+    },
+    "ctaBoss": {
+      "type": "string"
+    },
+    "directive": {
+      "type": "string"
+    },
+    "creatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "entityId",
+          "name",
+          "health",
+          "aggression",
+          "hunger",
+          "x",
+          "y",
+          "corruptionExposure",
+          "isAfraid"
+        ],
+        "properties": {
+          "entityId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Stable entity identity; absent in the current legacy creature payload."
+          },
+          "name": {
+            "type": "string"
+          },
+          "health": {
+            "type": "number"
+          },
+          "aggression": {
+            "type": "number"
+          },
+          "hunger": {
+            "type": "number"
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "corruptionExposure": {
+            "type": "number"
+          },
+          "isAfraid": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "corruptionGrid": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

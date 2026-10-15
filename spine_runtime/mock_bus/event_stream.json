@@ -1,0 +1,17 @@
+[
+  {
+    "schemaVersion": "1.0.0",
+    "eventId": "event.mock.corruption-spike.001",
+    "worldId": "renzoverse.mock.cave",
+    "sequence": 1,
+    "tick": 42,
+    "occurredAt": "2026-10-15T17:00:00Z",
+    "eventType": "corruption.threshold-crossed",
+    "payload": {
+      "regionId": "region.mock.deep-cave",
+      "previousValue": 11.5,
+      "currentValue": 12.5
+    },
+    "sourceModuleId": "cavesharp.mock"
+  }
+]

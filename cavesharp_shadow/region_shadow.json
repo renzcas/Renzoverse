@@ -1,0 +1,51 @@
+{
+  "artifact": "CaveSharp region/world shadow",
+  "shadowVersion": "1.0.0",
+  "pillar": "CaveSharp-OS",
+  "sourceEvidence": [
+    {
+      "path": "modules/CaveSharp-OS/Realm/RealmRegion.cs",
+      "revisionState": "pinned",
+      "properties": {
+        "Name": "string",
+        "ResonanceFactor": "float",
+        "HarmonicLevel": "float",
+        "Ambience": "string",
+        "LightShift": "float"
+      }
+    },
+    {
+      "path": "modules/CaveSharp-OS/Map/MapEngine.cs",
+      "revisionState": "pinned",
+      "observation": "Runtime map engine exists; no canonical world catalog output was identified in the inspected integration path."
+    },
+    {
+      "path": "modules/CaveSharp-OS/MetaAI/Overseer.cs",
+      "revisionState": "pinned",
+      "observation": "Telemetry snapshot has no worldId, region ID, region list, or region-state field."
+    }
+  ],
+  "telemetryRegionFieldsObserved": [],
+  "worldContractFieldsRequired": [
+    "schemaVersion",
+    "worldId",
+    "worldVersion",
+    "name",
+    "regions",
+    "entityTypes"
+  ],
+  "missingWorldIdentityFields": [
+    "worldId",
+    "worldVersion",
+    "regionId",
+    "entityTypeId"
+  ],
+  "adapterRequirements": [
+    "Define stable world, region, and entity-type IDs in an authored catalog.",
+    "Keep mutable region values separate from world definitions.",
+    "Do not derive IDs from RealmRegion.Name.",
+    "Do not infer region geometry from corruption grid indices without documented mapping."
+  ],
+  "targetContract": "urn:renzoverse:spine:world:v1",
+  "runtimeEmissionVerified": false
+}
