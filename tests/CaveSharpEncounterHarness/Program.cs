@@ -40,6 +40,31 @@ Require(encounter.State == TerritorialAggroState.StrikeEngagement, "clear, low-r
 creatureManager.Tick(1f / 60f, Observe(1f, 0f, visibility: 0.1f));
 Require(encounter.State == TerritorialAggroState.TerritorialTracking, "darkness interrupts strike confidence");
 
+    var now = new DateTimeOffset(2026, 10, 16, 5, 0, 0, TimeSpan.Zero);
+    var targetProvider = new PlayerEncounterTargetProvider(
+        TimeSpan.FromSeconds(1), () => now);
+    Require(targetProvider.GetCurrentObservation() is null, "target starts disconnected");
+    var playerObservation = new EncounterObservation(
+        new EncounterTarget(-1.5f, -40.57f), 0.9f, 0.2f);
+    targetProvider.Publish(playerObservation);
+    Require(
+        targetProvider.GetCurrentObservation() == playerObservation,
+        "provider exposes the latest validated player position");
+    now += TimeSpan.FromSeconds(1.1);
+    Require(targetProvider.GetCurrentObservation() is null, "stale player position expires");
+
+    var invalidObservationRejected = false;
+    try
+    {
+        targetProvider.Publish(new EncounterObservation(
+            new EncounterTarget(0f, 0f), 1.1f, 0f));
+    }
+    catch (ArgumentOutOfRangeException)
+    {
+        invalidObservationRejected = true;
+    }
+    Require(invalidObservationRejected, "provider rejects invalid visibility input");
+
 Console.WriteLine("CaveSharp territorial encounter tests passed.");
 
 static EncounterObservation Observe(
