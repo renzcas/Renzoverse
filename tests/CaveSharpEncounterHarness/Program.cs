@@ -16,20 +16,40 @@ var creatureManager = new CreatureManager(
     new CombatEngine());
 creatureManager.RegisterTerritorialEncounter(encounter);
 
-creatureManager.Tick(1f / 60f, new EncounterTarget(8f, 0f));
+creatureManager.Tick(1f / 60f, Observe(8f, 0f));
 Require(encounter.State == TerritorialAggroState.TerritorialTracking, "territory entry starts tracking");
-creatureManager.Tick(1f / 60f, new EncounterTarget(1f, 0f));
+creatureManager.Tick(1f / 60f, Observe(1f, 0f));
 Require(encounter.State == TerritorialAggroState.StrikeEngagement, "close approach advances tracking to strike engagement");
-creatureManager.Tick(1f / 60f, new EncounterTarget(5f, 0f));
+creatureManager.Tick(1f / 60f, Observe(5f, 0f));
 Require(encounter.State == TerritorialAggroState.TerritorialTracking, "retreat from strike range returns to tracking");
-creatureManager.Tick(1f / 60f, new EncounterTarget(10.01f, 0f));
+creatureManager.Tick(1f / 60f, Observe(10.01f, 0f));
 Require(encounter.State == TerritorialAggroState.Ambush, "leaving territory resets the encounter");
-creatureManager.Tick(1f / 60f, new EncounterTarget(1f, 0f));
+creatureManager.Tick(1f / 60f, Observe(1f, 0f));
 Require(encounter.State == TerritorialAggroState.TerritorialTracking, "close entry still begins with tracking");
 creatureManager.Tick(1f / 60f);
 Require(encounter.State == TerritorialAggroState.Ambush, "missing target returns the guardian to ambush");
 
+creatureManager.Tick(1f / 60f, Observe(1f, 0f, visibility: 0.1f));
+Require(encounter.State == TerritorialAggroState.TerritorialTracking, "darkness delays a strike");
+creatureManager.Tick(1f / 60f, Observe(1f, 0f, perceivedThreat: 0.9f));
+Require(encounter.State == TerritorialAggroState.Withdrawal, "high immediate threat triggers withdrawal");
+creatureManager.Tick(1f / 60f, Observe(1f, 0f));
+Require(encounter.State == TerritorialAggroState.TerritorialTracking, "reduced threat returns to tracking before re-engaging");
+creatureManager.Tick(1f / 60f, Observe(1f, 0f));
+Require(encounter.State == TerritorialAggroState.StrikeEngagement, "clear, low-risk approach permits a strike");
+creatureManager.Tick(1f / 60f, Observe(1f, 0f, visibility: 0.1f));
+Require(encounter.State == TerritorialAggroState.TerritorialTracking, "darkness interrupts strike confidence");
+
 Console.WriteLine("CaveSharp territorial encounter tests passed.");
+
+static EncounterObservation Observe(
+    float x,
+    float y,
+    float visibility = 1f,
+    float perceivedThreat = 0f)
+{
+    return new EncounterObservation(new EncounterTarget(x, y), visibility, perceivedThreat);
+}
 
 static void Require(bool condition, string description)
 {
