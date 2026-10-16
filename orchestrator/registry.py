@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import logging
 import sys
 import uuid
@@ -9,6 +10,8 @@ from types import ModuleType
 from typing import Any
 
 from orchestrator.organ_contract import OrganRequest, OrganResponse
+from spine_runtime.contract_validator import ContractValidator
+from spine_runtime.module_catalog import ModuleCatalog
 
 
 LOGGER = logging.getLogger(__name__)
@@ -16,6 +19,7 @@ DEFAULT_ORGANS_DIR = (
     Path(__file__).resolve().parents[1] / "master_core" / "UTL" / "organs"
 )
 OrganHandler = Callable[[OrganRequest], OrganResponse]
+MANIFEST_FILENAME = "manifest.json"
 
 
 class OrganLoadError(RuntimeError):
@@ -26,11 +30,16 @@ class OrganRegistry:
     def __init__(self, organs_dir: str | Path = DEFAULT_ORGANS_DIR) -> None:
         self.organs_dir = Path(organs_dir).resolve()
         self._handlers: dict[str, OrganHandler] = {}
+        self._manifests: dict[str, Mapping[str, Any]] = {}
         self._module_namespace = f"_renzoverse_organs_{uuid.uuid4().hex}"
 
     @property
     def handlers(self) -> Mapping[str, OrganHandler]:
         return self._handlers.copy()
+
+    @property
+    def manifests(self) -> Mapping[str, Mapping[str, Any]]:
+        return self._manifests.copy()
 
     def discover(self) -> Mapping[str, OrganHandler]:
         if not self.organs_dir.is_dir():
@@ -45,7 +54,7 @@ class OrganRegistry:
         namespace.__spec__.submodule_search_locations = [str(self.organs_dir)]
         sys.modules[self._module_namespace] = namespace
 
-        discovered: dict[str, OrganHandler] = {}
+        candidates: list[tuple[str, Path, Path, Mapping[str, Any]]] = []
         for organ_dir in sorted(self.organs_dir.iterdir(), key=lambda path: path.name.casefold()):
             if not organ_dir.is_dir() or organ_dir.name.startswith("."):
                 continue
@@ -62,15 +71,43 @@ class OrganRegistry:
                 )
 
             try:
+                manifest_path = organ_dir / MANIFEST_FILENAME
+                if not manifest_path.is_file():
+                    raise FileNotFoundError(
+                        f"Required organ manifest not found: {manifest_path}"
+                    )
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                if not isinstance(manifest, dict):
+                    raise TypeError("manifest.json must contain a JSON object.")
+            except Exception as exc:
+                raise OrganLoadError(
+                    f"Could not load manifest for organ '{organ_dir.name}': {exc}"
+                ) from exc
+
+            candidates.append((organ_dir.name, organ_dir, engine_path, manifest))
+
+        try:
+            manifest_catalog = ModuleCatalog(ContractValidator()).load(
+                [manifest for _, _, _, manifest in candidates]
+            )
+        except Exception as exc:
+            raise OrganLoadError(f"Invalid organ manifest catalog: {exc}") from exc
+
+        discovered: dict[str, OrganHandler] = {}
+        discovered_manifests: dict[str, Mapping[str, Any]] = {}
+        for organ_name, organ_dir, engine_path, manifest in candidates:
+            try:
                 handler = self._load_handler(organ_dir, engine_path)
             except Exception as exc:
-                raise OrganLoadError(f"Could not load organ '{organ_dir.name}': {exc}") from exc
+                raise OrganLoadError(
+                    f"Could not load organ '{organ_name}': {exc}"
+                ) from exc
 
-            if organ_dir.name in discovered:
-                raise OrganLoadError(f"Duplicate organ name: {organ_dir.name}")
-            discovered[organ_dir.name] = handler
+            discovered[organ_name] = handler
+            discovered_manifests[organ_name] = manifest_catalog[manifest["moduleId"]]
 
         self._handlers = discovered
+        self._manifests = discovered_manifests
         LOGGER.info("Discovered %d executable organ(s).", len(discovered))
         return self.handlers
 

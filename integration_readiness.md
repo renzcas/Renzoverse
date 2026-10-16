@@ -6,8 +6,8 @@ Assessment of the checked-out sources and current Spine drafts. “Ready” is s
 
 | Pillar | Contract readiness | Runtime integration readiness | Main blocker |
 |---|---|---|---|
-| Renzos-Cave viewer | **Validated v1 world/snapshot consumption implemented** | **Partial / blocked for live engine** | UI/API/schema paths tested; full CaveSharp build errors prevent a live producer flow |
-| CaveSharp-OS engine | **Opt-in v1 snapshot builder/emitter and atomic file transport implemented** | **Blocked for live runtime** | Full engine build errors; producer does not yet run canonical JSON Schema validation internally |
+| Renzos-Cave viewer | **Validated v1 world/snapshot consumption implemented** | **Partial / live engine flow not verified** | UI/API/schema paths tested; end-to-end live producer output has not been exercised |
+| CaveSharp-OS engine | **Opt-in v1 snapshot builder/emitter and atomic file transport implemented** | **Build and boot smoke-tested; v1 flow unverified** | Build succeeds and the engine completes a boot smoke test with `DOTNET_ROLL_FORWARD=Major`; the producer does not yet run canonical JSON Schema validation internally |
 | Renzo-Hacker-Lab cockpit | **Snapshot/world client implemented** | **Partial / blocked for live runtime** | Two read-only dashboard consumers and deterministic shared-API test; existing full launch paths have unrelated import blockers |
 | Renzoverse world/catalog | **Authored CaveSharp `world_contract` catalog exists and validates** | **Partial** | Additional world entries and module-manifest population remain pending |
 
@@ -23,7 +23,7 @@ Assessment of the checked-out sources and current Spine drafts. “Ready” is s
 | World layer / region overlays | **Catalog context active; spatial overlays pending** | HUD displays authored world/region names; no region geometry mapping is asserted, and no heatmap is rendered without grid semantics. |
 | Mock validation | **Legacy mock exists** | The mock server sends sample legacy messages; it does not validate or serve canonical v1 fixtures. |
 | Contract activation | **Implemented and tested** | Browser validator and Renzoverse API tests cover v1 fixtures and failure states. |
-| Runtime integration | **Blocked for live engine** | Actual Phase 9 opt-in file is consumed through the validated API, but pinned CaveSharp build errors prevent proof of live output. |
+| Runtime integration | **Partial / live producer flow not verified** | The Phase 9 opt-in file is consumed through the validated API. CaveSharp build and boot smoke tests pass, but live v1 file emission has not been verified end-to-end. |
 
 ## CaveSharp-OS — Engine
 
@@ -36,7 +36,7 @@ Assessment of the checked-out sources and current Spine drafts. “Ready” is s
 | Commands | **Legacy surface** | CTA command server/hooks exist; command schema, authorization, audit, and explicit correlated result are unverified. |
 | Conformance level | **0–1 by boundary** | Level 1 for legacy overlapping telemetry; level 0 for unverified world/event/command boundaries. No level 2/3 evidence. |
 | Adapter requirements | **High** | Need authoritative identity/tick/sequence, field semantics, schema validation, and explicit error behavior. |
-| Runtime integration | **Blocked** | Full CaveSharp build still fails on pre-existing source errors; no live v1 emission was verified. |
+| Runtime integration | **Partial / v1 flow not verified** | Build succeeds and boot smoke testing passes with major-version runtime roll-forward. Live v1 emission has not been verified, and the producer does not run full canonical JSON Schema validation internally. |
 
 See the [CaveSharp contract delta report](./cavesharp_shadow/delta_report.md) and the shadow JSON files alongside it for the pinned-vs-local field comparison.
 
@@ -51,7 +51,7 @@ See the [CaveSharp contract delta report](./cavesharp_shadow/delta_report.md) an
 | Command patterns | **Not activated** | No cross-pillar authorized command client/result/audit flow verified. |
 | Telemetry consumers | **Implemented and fixture-tested** | Client reads both world and latest telemetry endpoints, validates canonical schemas, checks matching world ID and valid tick progression (accepting process reset only with a newer timestamp), and preserves last valid snapshot on failure. |
 | Event consumers | **Not activated** | Existing Hacker-Lab event buses carry local agent/world signals without Spine envelope, sequencing, or shared event transport. |
-| Runtime integration | **Partial / blocked** | Cross-pillar API test passes; the BigAnimal and ClaudeCode top-level runtime launch paths have unrelated import blockers. Live CaveSharp flow is also blocked by its build errors. |
+| Runtime integration | **Partial / blocked** | Cross-pillar API test passes; the BigAnimal and ClaudeCode top-level runtime launch paths have unrelated import blockers. Live CaveSharp v1 emission has not yet been verified end-to-end. |
 
 ## Renzoverse — World and module catalog
 

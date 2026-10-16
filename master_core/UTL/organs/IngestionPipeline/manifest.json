@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0.0",
+  "moduleId": "renzoverse.organ.ingestion_pipeline",
+  "displayName": "Ingestion Pipeline",
+  "version": "0.1.0",
+  "source": {
+    "repository": "Renzoverse",
+    "revision": "c4623132203d8956620f57f938e5d9b82d9a1add"
+  },
+  "capabilities": [
+    "records.ingest"
+  ],
+  "contracts": [
+    "urn:renzoverse:spine:module:v1@1.0.0"
+  ],
+  "entrypoints": [
+    "execute"
+  ]
+}

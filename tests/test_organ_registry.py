@@ -1,3 +1,4 @@
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -37,6 +38,24 @@ class OrganRegistryTests(unittest.TestCase):
             encoding="utf-8",
         )
         (organ_dir / "engine.py").write_text(engine, encoding="utf-8")
+        (organ_dir / "manifest.json").write_text(
+            json.dumps(
+                {
+                    "schemaVersion": "1.0.0",
+                    "moduleId": f"test.organ.{name.lower()}",
+                    "displayName": name,
+                    "version": "0.1.0",
+                    "source": {
+                        "repository": "test-fixture",
+                        "revision": "test-revision",
+                    },
+                    "capabilities": ["test.execute"],
+                    "contracts": ["urn:renzoverse:spine:module:v1@1.0.0"],
+                    "entrypoints": ["execute"],
+                }
+            ),
+            encoding="utf-8",
+        )
 
     def test_discovers_and_executes_organ_using_shared_contract(self) -> None:
         self.add_organ(
@@ -54,6 +73,10 @@ class OrganRegistryTests(unittest.TestCase):
 
         self.assertEqual(set(registered), {"EchoOrgan"})
         self.assertEqual(response.data, {"message": "hello"})
+        self.assertEqual(
+            registry.manifests["EchoOrgan"]["moduleId"],
+            "test.organ.echoorgan",
+        )
 
     def test_skips_empty_placeholder_engines(self) -> None:
         self.add_organ("Placeholder", "")
@@ -66,6 +89,27 @@ class OrganRegistryTests(unittest.TestCase):
         self.add_organ("InvalidOrgan", "VALUE = 1\n")
 
         with self.assertRaisesRegex(OrganLoadError, "execute"):
+            OrganRegistry(self.organs_dir).discover()
+
+    def test_rejects_invalid_module_manifest(self) -> None:
+        self.add_organ("InvalidManifest", "def execute(request):\n    return None\n")
+        (self.organs_dir / "InvalidManifest" / "manifest.json").write_text(
+            json.dumps({"moduleId": "missing-required-fields"}), encoding="utf-8"
+        )
+
+        with self.assertRaisesRegex(OrganLoadError, "Invalid organ manifest"):
+            OrganRegistry(self.organs_dir).discover()
+
+    def test_rejects_unsupported_manifest_contract(self) -> None:
+        self.add_organ(
+            "UnsupportedContract", "def execute(request):\n    return None\n"
+        )
+        manifest_path = self.organs_dir / "UnsupportedContract" / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["contracts"] = ["urn:unknown:contract:v1@1.0.0"]
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+        with self.assertRaisesRegex(OrganLoadError, "unsupported contract"):
             OrganRegistry(self.organs_dir).discover()
 
     def test_reports_missing_organs_directory(self) -> None:
@@ -85,6 +129,10 @@ class OrganRegistryTests(unittest.TestCase):
     def test_discovers_and_executes_ingestion_pipeline(self) -> None:
         registry = discover_organs()
         self.assertIn("IngestionPipeline", registry.handlers)
+        self.assertEqual(
+            registry.manifests["IngestionPipeline"]["moduleId"],
+            "renzoverse.organ.ingestion_pipeline",
+        )
 
         single = registry.execute(
             "IngestionPipeline",

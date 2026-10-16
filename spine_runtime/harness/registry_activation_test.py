@@ -36,5 +36,10 @@ class RegistryActivationTests(TestCase):
         with self.assertRaisesRegex(ContractValidationError, "unsupported contract"):
             ModuleCatalog(validator).load([manifest])
 
-    def test_existing_organ_registry_still_discovers_no_placeholders(self) -> None:
-        self.assertEqual(dict(discover_organs().discover()), {})
+    def test_existing_organ_registry_exposes_manifest_without_changing_execution(self) -> None:
+        registry = discover_organs()
+        self.assertEqual(set(registry.handlers), {"IngestionPipeline"})
+        self.assertEqual(
+            registry.manifests["IngestionPipeline"]["moduleId"],
+            "renzoverse.organ.ingestion_pipeline",
+        )

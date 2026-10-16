@@ -64,3 +64,5 @@ response = registry.execute(
 ```
 
 `IngestionPipeline` is the first executable organ. It accepts a single record in the payload or a `records` list of dictionaries, returns the ingested records and count, and reports malformed batches through `OrganResponse`. The other five organ engines remain placeholders. Run the registry tests with `python3 -m unittest discover -s tests -v`.
+
+Organ discovery validates each executable organ's `manifest.json` against the Spine `module_contract` schema. Install the schema validator dependency with `python3 -m pip install -r spine_runtime/requirements.txt` before running the registry or its tests.
