@@ -26,14 +26,14 @@ Status labels:
 
 ### Registered Python organs
 
-All six organ directories have `__init__.py`, a `contract.py` re-exporting the shared Python request/response types, an empty `model.py`, and an empty `engine.py`. The registry therefore correctly treats them as placeholders, not executable organs.
+All six organ directories have `__init__.py`, a `contract.py` re-exporting the shared Python request/response types, and an empty `model.py`. `IngestionPipeline` now has an executable `engine.py`; the other five `engine.py` files remain placeholders.
 
 | Organ | Files | Status |
 |---|---|---|
 | ASCANNER_DARKLY | `master_core/UTL/organs/ASCANNER_DARKLY/{__init__.py,contract.py,engine.py,model.py}` | Placeholder |
 | EquilibriumSolver | `master_core/UTL/organs/EquilibriumSolver/{__init__.py,contract.py,engine.py,model.py}` | Placeholder |
 | EraEngine | `master_core/UTL/organs/EraEngine/{__init__.py,contract.py,engine.py,model.py}` | Placeholder |
-| IngestionPipeline | `master_core/UTL/organs/IngestionPipeline/{__init__.py,contract.py,engine.py,model.py}` | Placeholder |
+| IngestionPipeline | `master_core/UTL/organs/IngestionPipeline/{__init__.py,contract.py,engine.py,model.py}` | Implemented and registry-tested; accepts one record or a list of dictionary records |
 | SnapshotEvolutionEngine | `master_core/UTL/organs/SnapshotEvolutionEngine/{__init__.py,contract.py,engine.py,model.py}` | Placeholder |
 | TemporalHarmonizer | `master_core/UTL/organs/TemporalHarmonizer/{__init__.py,contract.py,engine.py,model.py}` | Placeholder |
 

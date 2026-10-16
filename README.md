@@ -63,4 +63,4 @@ response = registry.execute(
 )
 ```
 
-The current organ engines are empty placeholders, so discovery returns no executable organs yet. Implement the first organ engine before calling it by name. Run the registry tests with `python3 -m unittest discover -s tests -v`.
+`IngestionPipeline` is the first executable organ. It accepts a single record in the payload or a `records` list of dictionaries, returns the ingested records and count, and reports malformed batches through `OrganResponse`. The other five organ engines remain placeholders. Run the registry tests with `python3 -m unittest discover -s tests -v`.

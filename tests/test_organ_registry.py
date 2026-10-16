@@ -82,6 +82,41 @@ class OrganRegistryTests(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, "expected OrganResponse"):
             registry.execute("InvalidResponse", OrganRequest(payload={}))
 
+    def test_discovers_and_executes_ingestion_pipeline(self) -> None:
+        registry = discover_organs()
+        self.assertIn("IngestionPipeline", registry.handlers)
+
+        single = registry.execute(
+            "IngestionPipeline",
+            OrganRequest(payload={"source": "example"}, context_tags=["demo"]),
+        )
+        batch = registry.execute(
+            "IngestionPipeline",
+            OrganRequest(payload={"records": [{"id": 1}, {"id": 2}]}),
+        )
+
+        self.assertTrue(single.success)
+        self.assertEqual(
+            single.data,
+            {
+                "records": [{"source": "example"}],
+                "record_count": 1,
+                "context_tags": ["demo"],
+            },
+        )
+        self.assertTrue(batch.success)
+        self.assertEqual(batch.data["record_count"], 2)
+
+    def test_ingestion_pipeline_rejects_malformed_records(self) -> None:
+        registry = discover_organs()
+        response = registry.execute(
+            "IngestionPipeline",
+            OrganRequest(payload={"records": [{"id": 1}, "invalid"]}),
+        )
+
+        self.assertFalse(response.success)
+        self.assertIn("records[1]", response.error or "")
+
 
 if __name__ == "__main__":
     unittest.main()
