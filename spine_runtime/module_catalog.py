@@ -1,47 +1,78 @@
-"""Validated local catalog for module-contract manifests."""
+"""
+Validate manifests and supported contract IDs without importing modules.
+"""
 
 from __future__ import annotations
-
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-from spine_runtime.contract_errors import ContractValidationError
 from spine_runtime.contract_validator import ContractValidator
+from spine_runtime.contract_errors import ContractValidationError
+
+
+# ---------------------------------------------------------------------------
+# Contract URN registry
+# ---------------------------------------------------------------------------
 
 CONTRACT_IDS = {
-    "telemetry_contract": "urn:renzoverse:spine:telemetry:v1@1.0.0",
-    "world_contract": "urn:renzoverse:spine:world:v1@1.0.0",
-    "event_contract": "urn:renzoverse:spine:event:v1@1.0.0",
-    "command_contract": "urn:renzoverse:spine:command:v1@1.0.0",
-    "module_contract": "urn:renzoverse:spine:module:v1@1.0.0",
+    "module_contract":   "urn:renzoverse:spine:module:v1@1.0.0",
+    "command_contract":  "urn:renzoverse:spine:command:v1@1.0.0",
+    "event_contract":    "urn:renzoverse:spine:event:v1@1.0.0",
+    "world_contract":    "urn:renzoverse:spine:world:v1@1.0.0",
+    "telemetry_contract":"urn:renzoverse:spine:telemetry:v1@1.0.0",
+
+    # -----------------------------------------------------------------------
+    # InfoPhyzx module registration (from your active tab)
+    # -----------------------------------------------------------------------
+    "infophyzx": {
+        "contract": "master_core.UTL.organs.InfoPhyzxEngine.contract",
+        "engine":   "master_core.UTL.organs.InfoPhyzxEngine.engine",
+        "model":    "master_core.UTL.organs.InfoPhyzxEngine.model",
+    },
 }
 
 
+# ---------------------------------------------------------------------------
+# ModuleCatalog
+# ---------------------------------------------------------------------------
+
 class ModuleCatalog:
-    """Validate manifests and supported contract IDs without importing modules."""
+    """
+    Validate manifests and supported contract IDs without importing modules.
+    """
 
-    def __init__(self, validator: ContractValidator) -> None:
-        self.validator = validator
+    def __init__(self, manifests: Mapping[str, Mapping[str, Any]]):
+        self.manifests = manifests
 
-    def load(self, manifests: Iterable[Mapping[str, Any]]) -> dict[str, Mapping[str, Any]]:
-        catalog: dict[str, Mapping[str, Any]] = {}
-        supported_ids = set(CONTRACT_IDS.values())
-        for index, manifest in enumerate(manifests):
-            self.validator.validate("module_contract", manifest)
-            module_id = manifest["moduleId"]
-            if module_id in catalog:
-                raise ContractValidationError(
-                    "module_contract", [f"$[{index}].moduleId: duplicate module ID '{module_id}'"]
+    # -----------------------------------------------------------------------
+    # Validation
+    # -----------------------------------------------------------------------
+
+    def validate(self) -> None:
+        """
+        Validate all manifests using ContractValidator.
+        Raises ContractValidationError on failure.
+        """
+        for module_name, manifest in self.manifests.items():
+            try:
+                ContractValidator.validate_manifest(
+                    manifest=manifest,
+                    contract_ids=CONTRACT_IDS
                 )
-
-            unsupported = sorted(set(manifest["contracts"]) - supported_ids)
-            if unsupported:
+            except ContractValidationError as exc:
                 raise ContractValidationError(
-                    "module_contract",
-                    [
-                        f"$[{index}].contracts: unsupported contract reference '{contract_id}'"
-                        for contract_id in unsupported
-                    ],
-                )
-            catalog[module_id] = manifest
-        return catalog
+                    f"Validation failed for module '{module_name}': {exc}"
+                ) from exc
+
+    # -----------------------------------------------------------------------
+    # Iteration
+    # -----------------------------------------------------------------------
+
+    def __iter__(self) -> Iterable[str]:
+        return iter(self.manifests)
+
+    def items(self) -> Iterable[tuple[str, Mapping[str, Any]]]:
+        return self.manifests.items()
+
+    def get(self, module_name: str) -> Mapping[str, Any] | None:
+        return self.manifests.get(module_name)
