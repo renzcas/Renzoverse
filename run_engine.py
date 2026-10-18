@@ -3,6 +3,14 @@ run_engine.py
 Orchestration entrypoint to boot InfoEngine through Renzoverse.
 """
 
+import sys
+import os
+
+# Add the parent container of InfoEngine to sys.path
+hacker_lab_path = os.path.abspath("/workspaces/Renzo-Hacker-Lab")
+if hacker_lab_path not in sys.path:
+    sys.path.insert(0, hacker_lab_path)
+
 from InfoEngine.Cosmos.Dimensions import Dimensions
 from InfoEngine.Cosmos.Physics.dynamics import PhysicsDynamics
 from InfoEngine.Cosmos.Math.hilbert import hilbert_mode
