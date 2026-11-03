@@ -1,6 +1,6 @@
 # Spine Runtime
 
-`spine_runtime` is a small parent-repository runtime for loading the checked-in Spine schemas, validating messages, routing validated messages to in-process handlers, and exercising deterministic fixture flows. It has no dependency on CaveSharp and does not modify the viewer or existing Python organ registry.
+`spine_runtime` is a small parent-repository runtime for loading the checked-in Spine schemas, validating messages, routing validated messages to in-process handlers, exercising deterministic fixture flows, and serving read-only viewer and module-status APIs. It has no dependency on CaveSharp and does not modify the existing Python organ registry.
 
 ## Install and run
 
@@ -45,6 +45,8 @@ The mock module catalog validates module manifests and known contract-version re
 The harness validates fixture shapes, routing, a documented legacy-telemetry conversion, and viewer-facing field availability. It does **not** run a browser, assert actual DOM rendering, change the viewer, exercise the existing organ execution registry with network messages, or verify CaveSharp/runtime integration. Those remain separate activation gates.
 
 The telemetry adapter requires the caller to supply an authoritative world ID, simulation tick, timestamp, and stable creature-ID mapping. It refuses to invent them. Its output is contract-validated before it is returned.
+
+The viewer server exposes `GET /api/modules` and `GET /api/modules/{id}/status` from the root `renzoverse.json` registry. Status checks repository and entry-point presence, prerequisite executable presence, and declared telemetry-file validity. Prerequisite versions are not executed or verified; process state reports `not_managed` until a control-plane launcher owns process tracking. These routes are read-only and do not launch modules.
 
 At the creature boundary, it accepts the pinned `System.Text.Json` PascalCase DTO properties and the local camelCase serializer shape, normalizing both to the contract's camelCase fields. If both casings for a field are present, it rejects the ambiguous input.
 

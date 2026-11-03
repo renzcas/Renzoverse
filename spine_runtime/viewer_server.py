@@ -12,6 +12,7 @@ from urllib.parse import urlsplit
 
 from spine_runtime.contract_errors import ContractValidationError
 from spine_runtime.contract_validator import ContractValidator
+from spine_runtime.module_registry import DEFAULT_REGISTRY_PATH, ModuleRegistry
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SITE_DIR = ROOT / "renzoverse_vault" / "renzo-verse" / "site"
@@ -28,11 +29,13 @@ class ViewerRequestHandler(SimpleHTTPRequestHandler):
         validator: ContractValidator,
         telemetry_path: Path,
         world_path: Path,
+        module_registry: ModuleRegistry,
         **kwargs: Any,
     ) -> None:
         self.validator = validator
         self.telemetry_path = telemetry_path
         self.world_path = world_path
+        self.module_registry = module_registry
         super().__init__(*args, directory=directory, **kwargs)
 
     def do_GET(self) -> None:
@@ -42,6 +45,19 @@ class ViewerRequestHandler(SimpleHTTPRequestHandler):
             return
         if path == "/api/world/v1/current":
             self._serve_contract_file(self.world_path, "world_contract")
+            return
+        if path == "/api/modules":
+            self._send_json(200, self.module_registry.list_status())
+            return
+        if path.startswith("/api/modules/") and path.endswith("/status"):
+            module_id = path.removeprefix("/api/modules/").removesuffix("/status").strip("/")
+            if not module_id or "/" in module_id:
+                self._send_json(404, {"error": "module_not_found"})
+                return
+            try:
+                self._send_json(200, self.module_registry.module_status(module_id))
+            except KeyError:
+                self._send_json(404, {"error": "module_not_found"})
             return
         super().do_GET()
 
@@ -90,6 +106,8 @@ def create_server(
     site_dir: Path = DEFAULT_SITE_DIR,
     telemetry_path: Path = DEFAULT_TELEMETRY_PATH,
     world_path: Path = DEFAULT_WORLD_PATH,
+    registry_path: Path = DEFAULT_REGISTRY_PATH,
+    registry_root: Path | None = None,
 ) -> ThreadingHTTPServer:
     site_dir = site_dir.resolve()
     telemetry_path = telemetry_path.resolve()
@@ -98,6 +116,11 @@ def create_server(
         raise FileNotFoundError(f"Viewer site directory does not exist: {site_dir}")
 
     validator = ContractValidator()
+    module_registry = ModuleRegistry(
+        registry_path=registry_path,
+        root=registry_root,
+        validator=validator,
+    )
 
     def handler(*args: Any, **kwargs: Any) -> ViewerRequestHandler:
         return ViewerRequestHandler(
@@ -106,6 +129,7 @@ def create_server(
             validator=validator,
             telemetry_path=telemetry_path,
             world_path=world_path,
+            module_registry=module_registry,
             **kwargs,
         )
 

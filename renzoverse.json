@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "project": "Renzoverse Command Center",
   "version": "1.0.0",
   "modules": {
@@ -7,6 +8,30 @@
       "path": "modules/CaveSharp-OS/",
       "runtime": ".NET 8.0",
       "entry_point": "CaveSharpEngine.csproj",
+      "launch": {
+        "working_directory": ".",
+        "argv": [
+          "dotnet",
+          "run",
+          "--project",
+          "modules/CaveSharp-OS/CaveSharpEngine.csproj"
+        ]
+      },
+      "prerequisites": [
+        {
+          "command": "dotnet",
+          "minimum_version": "8.0"
+        }
+      ],
+      "health_check": {
+        "kind": "process",
+        "startup_timeout_seconds": 30
+      },
+      "telemetry_source": {
+        "kind": "file",
+        "path": "shared/telemetry/cavesharp.v1.json",
+        "contract": "urn:renzoverse:spine:telemetry:v1@1.0.0"
+      },
       "telemetry_out": "shared/telemetry/cavesharp.json",
       "events_out": "shared/events/cavesharp_events.json"
     }

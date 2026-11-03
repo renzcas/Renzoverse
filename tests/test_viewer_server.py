@@ -18,6 +18,44 @@ class ViewerServerTests(TestCase):
         root = Path(self.temp_directory.name)
         self.telemetry_path = root / "latest.json"
         self.world_path = root / "world.json"
+        self.registry_root = root / "registry-root"
+        self.registry_root.mkdir()
+        self.registry_path = root / "renzoverse.json"
+        self.registry_path.write_text(
+            json.dumps(
+                {
+                    "project": "test registry",
+                    "version": "1.0.0",
+                    "modules": {
+                        "test-engine": {
+                            "name": "Test Engine",
+                            "path": "engine",
+                            "runtime": "Python",
+                            "entry_point": "engine.py",
+                            "launch": {
+                                "working_directory": ".",
+                                "argv": ["python3", "engine.py"],
+                            },
+                            "prerequisites": [],
+                            "health_check": {
+                                "kind": "process",
+                                "startup_timeout_seconds": 10,
+                            },
+                            "telemetry_source": {
+                                "kind": "file",
+                                "path": "latest.json",
+                                "contract": "urn:renzoverse:spine:telemetry:v1@1.0.0",
+                            },
+                        }
+                    },
+                    "pipes": {},
+                }
+            ),
+            encoding="utf-8",
+        )
+        engine_dir = self.registry_root / "engine"
+        engine_dir.mkdir()
+        (engine_dir / "engine.py").write_text("", encoding="utf-8")
         self.site_path = root / "site"
         self.site_path.mkdir()
         (self.site_path / "index.html").write_text("viewer", encoding="utf-8")
@@ -35,6 +73,8 @@ class ViewerServerTests(TestCase):
             site_dir=self.site_path,
             telemetry_path=self.telemetry_path,
             world_path=self.world_path,
+            registry_path=self.registry_path,
+            registry_root=self.registry_root,
         )
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
@@ -93,3 +133,29 @@ class ViewerServerTests(TestCase):
 
         self.assertEqual(status, 200)
         self.assertEqual(body, b"viewer")
+
+    def test_module_list_reports_discovery_and_telemetry_status(self) -> None:
+        (self.registry_root / "latest.json").write_text(
+            json.dumps(self.snapshot), encoding="utf-8"
+        )
+
+        status, headers, body = self.get("/api/modules")
+
+        payload = json.loads(body)
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["Cache-Control"], "no-store")
+        self.assertEqual(payload["modules"][0]["id"], "test-engine")
+        self.assertEqual(payload["modules"][0]["status"], "declared")
+        self.assertEqual(payload["modules"][0]["process"]["state"], "not_managed")
+        self.assertEqual(payload["modules"][0]["telemetry"]["state"], "valid")
+
+        status, _, body = self.get("/api/modules/test-engine/status")
+
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(body), payload["modules"][0])
+
+    def test_module_status_returns_not_found_for_unknown_module(self) -> None:
+        status, _, body = self.get("/api/modules/missing/status")
+
+        self.assertEqual(status, 404)
+        self.assertEqual(json.loads(body)["error"], "module_not_found")
