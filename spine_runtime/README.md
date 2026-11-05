@@ -13,6 +13,51 @@ python3 -m unittest discover -s spine_runtime/harness -p '*.py' -v
 
 The validator uses the `jsonschema` library for complete JSON Schema Draft 2020-12 behavior. No schemas are downloaded at runtime; the runtime only loads the checked-in local schemas and rejects remote `$ref` dependencies.
 
+## Live CaveSharp telemetry
+
+Install the requirements, then start the processes in separate terminals from the repository root:
+
+```sh
+DOTNET_ROLL_FORWARD=Major dotnet run --no-build --project modules/CaveSharp-OS/CaveSharpEngine.csproj -- --legacy --ticks 0
+python3 -m spine_runtime.telemetry_bridge --world-id renzoverse.cavesharp.primary
+python3 -m spine_runtime.viewer_server --host 0.0.0.0 --port 8000
+```
+
+`--ticks 0` keeps the legacy simulation running until it is stopped with Ctrl+C; omitting it keeps the existing 100-tick smoke-test behavior. The bridge reconnects to `ws://localhost:8181/telemetry/`, validates each converted packet against the checked-in [telemetry schema](../renzoverse_spine/telemetry_contract/schema.json), and atomically replaces `shared/telemetry/cavesharp.v1.json`. The viewer reads that latest snapshot from `/api/telemetry/v1/latest`. In Codespaces, forward port 8000 to open the viewer.
+
+The v1 snapshot envelope includes `schemaVersion`, authored `worldId`, increasing `tick`, UTC `generatedAt`, threat/CTA/corruption values, and the complete creature and corruption-grid state. Each creature must include its runtime `entityId`; the bridge rejects packets without it rather than fabricating identity. `weather` is preserved as an allowed extension field.
+
+Example snapshot shape:
+
+```json
+{
+	"schemaVersion": "1.0.0",
+	"worldId": "renzoverse.cavesharp.primary",
+	"tick": 42,
+	"generatedAt": "2026-11-05T10:30:00+00:00",
+	"threat": 24,
+	"cta": 18,
+	"corruption": 12.5,
+	"weather": "Storm",
+	"ctaBoss": "Overlord-Alpha",
+	"directive": "Monitor corruption nodes",
+	"creatures": [
+		{
+			"entityId": "dacbcbada85e4ff7a05efb894d8cd638",
+			"name": "TunnelRat",
+			"health": 85,
+			"aggression": 20,
+			"hunger": 35,
+			"x": -8,
+			"y": 4,
+			"corruptionExposure": 3,
+			"isAfraid": false
+		}
+	],
+	"corruptionGrid": [[0, 0.5], [0.25, 0]]
+}
+```
+
 ## API
 
 ```python
