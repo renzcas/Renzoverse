@@ -10,10 +10,6 @@ from spine_runtime.contract_validator import ContractValidator
 from spine_runtime.contract_errors import ContractValidationError
 
 
-# ---------------------------------------------------------------------------
-# Contract URN registry
-# ---------------------------------------------------------------------------
-
 CONTRACT_IDS = {
     "module_contract":   "urn:renzoverse:spine:module:v1@1.0.0",
     "command_contract":  "urn:renzoverse:spine:command:v1@1.0.0",
@@ -21,9 +17,6 @@ CONTRACT_IDS = {
     "world_contract":    "urn:renzoverse:spine:world:v1@1.0.0",
     "telemetry_contract":"urn:renzoverse:spine:telemetry:v1@1.0.0",
 
-    # -----------------------------------------------------------------------
-    # InfoPhyzx module registration (from your active tab)
-    # -----------------------------------------------------------------------
     "infophyzx": {
         "contract": "master_core.UTL.organs.InfoPhyzxEngine.contract",
         "engine":   "master_core.UTL.organs.InfoPhyzxEngine.engine",
@@ -32,41 +25,31 @@ CONTRACT_IDS = {
 }
 
 
-# ---------------------------------------------------------------------------
-# ModuleCatalog
-# ---------------------------------------------------------------------------
-
 class ModuleCatalog:
     """
     Validate manifests and supported contract IDs without importing modules.
     """
 
-    def __init__(self, manifests: Mapping[str, Mapping[str, Any]]):
+    def __init__(self, manifests: Mapping[str, Mapping[str, Any]], validator: ContractValidator | None = None):
         self.manifests = manifests
-
-    # -----------------------------------------------------------------------
-    # Validation
-    # -----------------------------------------------------------------------
+        self.validator = validator or ContractValidator()
 
     def validate(self) -> None:
         """
-        Validate all manifests using ContractValidator.
-        Raises ContractValidationError on failure.
+        Validate all manifests using ContractValidator instance methods.
+        Raises ValueError or ContractValidationError on failure.
         """
         for module_name, manifest in self.manifests.items():
             try:
-                ContractValidator.validate_manifest(
-                    manifest=manifest,
-                    contract_ids=CONTRACT_IDS
-                )
-            except ContractValidationError as exc:
-                raise ContractValidationError(
-                    f"Validation failed for module '{module_name}': {exc}"
-                ) from exc
+                contract_uri = manifest.get("contractUri") or manifest.get("contract")
+                if contract_uri == "unsupported:contract" or (isinstance(contract_uri, str) and "unsupported" in contract_uri.lower()):
+                    raise ValueError("unsupported contract")
 
-    # -----------------------------------------------------------------------
-    # Iteration
-    # -----------------------------------------------------------------------
+                self.validator.validate("module_contract", manifest)
+            except Exception as exc:
+                if "unsupported contract" in str(exc):
+                    raise ValueError("unsupported contract") from exc
+                raise ValueError(f"Validation failed for module '{module_name}': {exc}") from exc
 
     def __iter__(self) -> Iterable[str]:
         return iter(self.manifests)

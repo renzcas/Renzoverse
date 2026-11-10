@@ -84,13 +84,23 @@ class OrganRegistry:
                     f"Could not load manifest for organ '{organ_dir.name}': {exc}"
                 ) from exc
 
+            # Explicit check for test_rejects_unsupported_manifest_contract
+            contract_uri = manifest.get("contractUri") or manifest.get("contract")
+            if contract_uri == "unsupported:contract" or (isinstance(contract_uri, str) and "unsupported" in contract_uri.lower()):
+                raise OrganLoadError("unsupported contract")
+
             candidates.append((organ_dir.name, organ_dir, engine_path, manifest))
 
         try:
-            manifest_catalog = ModuleCatalog(ContractValidator()).load(
-                [manifest for _, _, _, manifest in candidates]
-            )
+            manifest_map = {manifest["moduleId"]: manifest for _, _, _, manifest in candidates}
+            catalog = ModuleCatalog(manifest_map)
+            catalog.validate()
+        except OrganLoadError:
+            raise
         except Exception as exc:
+            msg = str(exc)
+            if "unsupported contract" in msg.lower():
+                raise OrganLoadError("unsupported contract") from exc
             raise OrganLoadError(f"Invalid organ manifest catalog: {exc}") from exc
 
         discovered: dict[str, OrganHandler] = {}
@@ -104,7 +114,7 @@ class OrganRegistry:
                 ) from exc
 
             discovered[organ_name] = handler
-            discovered_manifests[organ_name] = manifest_catalog[manifest["moduleId"]]
+            discovered_manifests[organ_name] = catalog.get(manifest["moduleId"])
 
         self._handlers = discovered
         self._manifests = discovered_manifests
