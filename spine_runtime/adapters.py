@@ -147,3 +147,91 @@ def adapt_legacy_telemetry(
     }
     (validator or ContractValidator()).validate("telemetry_contract", snapshot)
     return snapshot
+
+
+def adapt_simcore_event(
+    snapshot: Mapping[str, Any],
+    *,
+    event_id: str | None = None,
+    world_id: str = "renzoverse.simcore.primary",
+    sequence: int | None = None,
+    occurred_at: str | None = None,
+    validator: ContractValidator | None = None,
+) -> dict[str, Any]:
+    """Convert a Renzo-SimCore agent tick snapshot into a validated Spine v1 event."""
+    if not isinstance(snapshot, Mapping):
+        raise ContractValidationError(
+            "event_contract", ["simcore snapshot must be an object"]
+        )
+    resolved_event_id = event_id or snapshot.get("eventId")
+    if not isinstance(resolved_event_id, str) or not resolved_event_id:
+        raise ContractValidationError(
+            "event_contract",
+            ["$.eventId: caller or snapshot must supply a non-empty eventId"],
+        )
+    if not isinstance(world_id, str) or not world_id:
+        raise ContractValidationError(
+            "event_contract", ["$.worldId: world_id must be a non-empty string"]
+        )
+    resolved_sequence = snapshot.get("sequence") if sequence is None else sequence
+    if (
+        isinstance(resolved_sequence, bool)
+        or not isinstance(resolved_sequence, int)
+        or resolved_sequence < 0
+    ):
+        raise ContractValidationError(
+            "event_contract", ["$.sequence: must be a non-negative integer"]
+        )
+    tick = snapshot.get("tick")
+    if isinstance(tick, bool) or not isinstance(tick, int) or tick < 0:
+        raise ContractValidationError(
+            "event_contract", ["$.tick: must be a non-negative integer"]
+        )
+    resolved_occurred_at = occurred_at or snapshot.get("occurredAt")
+    if not isinstance(resolved_occurred_at, str) or not resolved_occurred_at:
+        raise ContractValidationError(
+            "event_contract", ["$.occurredAt: must supply an RFC 3339 timestamp"]
+        )
+
+    agent = snapshot.get("agent")
+    beliefs = snapshot.get("beliefs")
+    metrics = snapshot.get("metrics")
+    if (
+        not isinstance(agent, Mapping)
+        or not isinstance(beliefs, Mapping)
+        or not isinstance(metrics, Mapping)
+    ):
+        raise ContractValidationError(
+            "event_contract",
+            ["$.payload: snapshot must contain object fields agent, beliefs, and metrics"],
+        )
+
+    required_agent_keys = ("id", "name", "role", "goal_satisfied", "memory_size")
+    missing_agent = [k for k in required_agent_keys if k not in agent]
+    if missing_agent:
+        raise ContractValidationError(
+            "event_contract",
+            [f"$.payload.agent: missing required field {k!r}" for k in missing_agent],
+        )
+
+    event = {
+        "schemaVersion": "1.0.0",
+        "eventId": resolved_event_id,
+        "worldId": world_id,
+        "sequence": resolved_sequence,
+        "tick": tick,
+        "occurredAt": resolved_occurred_at,
+        "eventType": "simcore.agent.state",
+        "sourceModuleId": "Renzo-SimCore",
+        "payload": {
+            "agentId": agent["id"],
+            "agentName": agent["name"],
+            "role": agent["role"],
+            "goalSatisfied": agent["goal_satisfied"],
+            "memorySize": agent["memory_size"],
+            "beliefs": dict(beliefs),
+            "metrics": dict(metrics),
+        },
+    }
+    (validator or ContractValidator()).validate("event_contract", event)
+    return event
