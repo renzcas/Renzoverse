@@ -28,6 +28,9 @@ CONTRACT_IDS = {
 
 SUPPORTED_CONTRACT_URIS = {v for v in CONTRACT_IDS.values() if isinstance(v, str)}
 
+
+SUPPORTED_CONTRACT_URIS = {v for v in CONTRACT_IDS.values() if isinstance(v, str)}
+
 class ModuleCatalog:
     """
     Validate manifests and supported contract IDs without importing modules.
@@ -48,6 +51,11 @@ class ModuleCatalog:
                 if contract_uri == "unsupported:contract" or (isinstance(contract_uri, str) and "unsupported" in contract_uri.lower()):
                     raise ValueError("unsupported contract")
 
+                contracts_list = manifest.get("contracts")
+                if isinstance(contracts_list, list):
+                    for c_uri in contracts_list:
+                        if not isinstance(c_uri, str) or c_uri not in SUPPORTED_CONTRACT_URIS:
+                            raise ValueError(f"unsupported contract: {c_uri}")
                 contracts_list = manifest.get("contracts")
                 if isinstance(contracts_list, list):
                     for c_uri in contracts_list:
