@@ -1,0 +1,77 @@
+{
+  "artifact": "CaveSharp creature snapshot shadow",
+  "shadowVersion": "1.0.0",
+  "pillar": "CaveSharp-OS",
+  "sourceEvidence": [
+    {
+      "path": "modules/CaveSharp-OS/Creatures/CreatureSnapshot.cs",
+      "revisionState": "pinned",
+      "declaredProperties": {
+        "Name": "string",
+        "Health": "float",
+        "Aggression": "float",
+        "X": "float",
+        "Y": "float",
+        "CorruptionExposure": "float"
+      }
+    },
+    {
+      "path": "modules/CaveSharp-OS/Creatures/CreatureManager.cs",
+      "revisionState": "pinned",
+      "assignedPropertiesInGetSnapshot": [
+        "Name",
+        "Health",
+        "Aggression",
+        "Hunger",
+        "X",
+        "Y",
+        "IsAfraid"
+      ],
+      "mismatch": "Hunger and IsAfraid are assigned but are absent from the pinned CreatureSnapshot class; this is a build-time source mismatch."
+    },
+    {
+      "path": "modules/CaveSharp-OS/Creatures/CreatureSnapshot.cs",
+      "revisionState": "local-worktree-modified",
+      "additionalProperties": {
+        "Hunger": "float",
+        "IsAfraid": "bool"
+      }
+    },
+    {
+      "path": "modules/CaveSharp-OS/Creatures/CreatureManager.cs",
+      "revisionState": "local-worktree",
+      "observation": "Inspected GetSnapshot assigns common fields but does not assign CorruptionExposure from Creature."
+    }
+  ],
+  "pinnedJsonPropertyCasing": "System.Text.Json default options preserve PascalCase for nested CreatureSnapshot properties.",
+  "localSerializerJsonPropertyCasing": "The untracked local TelemetrySnapshot serializer uses JsonSerializerDefaults.Web, which emits camelCase.",
+  "spineCreatureFields": {
+    "required": [
+      "entityId",
+      "name",
+      "health",
+      "aggression",
+      "hunger",
+      "x",
+      "y",
+      "corruptionExposure",
+      "isAfraid"
+    ],
+    "missingFromPinnedDto": [
+      "entityId",
+      "hunger",
+      "isAfraid"
+    ],
+    "not_populated_by_inspected_manager": [
+      "corruptionExposure"
+    ]
+  },
+  "targetContract": "urn:renzoverse:spine:telemetry:v1",
+  "adapterRules": [
+    "Do not derive entityId from display name, array position, or coordinates.",
+    "Reject missing required creature source fields instead of supplying default values.",
+    "Resolve entity identity through an explicit, stable mapping before emitting v1 telemetry.",
+    "Normalize field casing only in the adapter boundary and validate output."
+  ],
+  "runtimeEmissionVerified": false
+}

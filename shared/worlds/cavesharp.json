@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0.0",
+  "worldId": "renzoverse.cavesharp.primary",
+  "worldVersion": "1.0.0",
+  "name": "CaveSharp Primary World",
+  "description": "Authored identity catalog for CaveSharp contract telemetry.",
+  "regions": [
+    {
+      "regionId": "region.cavesharp.primary",
+      "name": "CaveSharp Primary Region"
+    }
+  ],
+  "entityTypes": [
+    {
+      "entityTypeId": "entity-type.cavesharp.creature",
+      "name": "Cave Creature"
+    }
+  ]
+}

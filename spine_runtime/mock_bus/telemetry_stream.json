@@ -1,0 +1,41 @@
+[
+  {
+    "schemaVersion": "1.0.0",
+    "worldId": "renzoverse.mock.cave",
+    "tick": 42,
+    "generatedAt": "2026-10-15T17:00:00Z",
+    "threat": 24,
+    "cta": 18,
+    "corruption": 12.5,
+    "ctaBoss": "Telemetry Fixture",
+    "directive": "Observe the cave",
+    "creatures": [
+      {
+        "entityId": "creature.tunnel-rat.001",
+        "name": "TunnelRat",
+        "health": 85,
+        "aggression": 20,
+        "hunger": 35,
+        "x": -8,
+        "y": 4,
+        "corruptionExposure": 3,
+        "isAfraid": false
+      },
+      {
+        "entityId": "creature.stone-crawler.001",
+        "name": "StoneCrawler",
+        "health": 42,
+        "aggression": 75,
+        "hunger": 80,
+        "x": 7,
+        "y": -5,
+        "corruptionExposure": 18,
+        "isAfraid": true
+      }
+    ],
+    "corruptionGrid": [
+      [0, 0.1],
+      [0.5, 0.8]
+    ]
+  }
+]

@@ -1,0 +1,61 @@
+{
+  "artifact": "CaveSharp Overseer telemetry shadow",
+  "shadowVersion": "1.0.0",
+  "pillar": "CaveSharp-OS",
+  "sourceEvidence": [
+    {
+      "path": "modules/CaveSharp-OS/MetaAI/Overseer.cs",
+      "revisionState": "pinned",
+      "telemetryRootFields": {
+        "threat": {
+          "source": "GlobalThreatLevel",
+          "sourceType": "int"
+        },
+        "cta": {
+          "source": "CTABoss.AggressionLevel",
+          "sourceType": "float"
+        },
+        "corruption": {
+          "source": "CorruptionMap.SpreadIntensity",
+          "sourceType": "float"
+        },
+        "creatures": {
+          "source": "CreatureManager.GetSnapshot()",
+          "sourceType": "List<CreatureSnapshot>"
+        },
+        "ctaBoss": {
+          "source": "CTABoss.Name",
+          "sourceType": "string"
+        },
+        "directive": {
+          "source": "GetDirective()",
+          "sourceType": "string"
+        },
+        "corruptionGrid": {
+          "source": "CorruptionMap.GetGrid()",
+          "sourceType": "float[,]"
+        }
+      }
+    }
+  ],
+  "missingTelemetryEnvelopeFields": [
+    "schemaVersion",
+    "worldId",
+    "tick",
+    "generatedAt"
+  ],
+  "sourceCaveats": [
+    "Pinned Overseer serializes its anonymous object using default System.Text.Json options.",
+    "Nested DTO properties therefore preserve PascalCase unless changed elsewhere.",
+    "The pinned creature DTO and manager disagree about Hunger and IsAfraid properties.",
+    "Direct serialization of the multidimensional corruption grid is not verified and may fail.",
+    "Local worktree changes add a camel-case serializer path but remain untracked/uncommitted in the submodule."
+  ],
+  "targetContract": "urn:renzoverse:spine:telemetry:v1",
+  "requiredActions": [
+    "Do not assume BroadcastState has successfully emitted a valid JSON frame.",
+    "Keep world identity, tick ownership, and timestamp sourcing explicit.",
+    "Validate complete snapshots before a future transport publishes them."
+  ],
+  "runtimeEmissionVerified": false
+}

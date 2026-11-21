@@ -1,0 +1,56 @@
+{
+  "artifact": "CaveSharp corruption state shadow",
+  "shadowVersion": "1.0.0",
+  "pillar": "CaveSharp-OS",
+  "sourceEvidence": [
+    {
+      "path": "modules/CaveSharp-OS/Realm/CorruptionMap.cs",
+      "revisionState": "pinned",
+      "properties": {
+        "SpreadIntensity": {
+          "type": "float",
+          "initialValue": 0.0,
+          "spreadIncrement": 0.2,
+          "pressureIncrement": 5.0,
+          "upperClamp": 100.0
+        },
+        "grid": {
+          "type": "float[32,32]",
+          "visibility": "private",
+          "initialValue": 0.0,
+          "updatedBySpread": false
+        }
+      },
+      "methods": [
+        "Spread()",
+        "Sample(float x, float y)",
+        "GetGrid()",
+        "IncreasePressure()"
+      ]
+    },
+    {
+      "path": "modules/CaveSharp-OS/MetaAI/Overseer.cs",
+      "revisionState": "pinned",
+      "observation": "Root telemetry field corruption is assigned from SpreadIntensity; corruptionGrid is assigned from GetGrid()."
+    }
+  ],
+  "legacyToSpine": [
+    {
+      "legacyField": "corruption",
+      "legacyType": "number",
+      "contractPath": "$.corruption",
+      "contractType": "number",
+      "difference": "Type overlaps; units and semantic normalization are not established. SpreadIntensity is clamped to 100 but should not be called a percentage without owner confirmation."
+    },
+    {
+      "legacyField": "corruptionGrid",
+      "legacySourceType": "float[,]",
+      "contractPath": "$.corruptionGrid",
+      "contractType": "array of arrays of numbers",
+      "difference": "Requires an explicit supported JSON conversion and documented axis, origin, cell semantics, and units."
+    }
+  ],
+  "worldRelationship": "Corruption rules and region association may be authored world configuration; current corruption values and grid belong in telemetry. No separate corruption_contract exists.",
+  "targetContract": "urn:renzoverse:spine:telemetry:v1",
+  "runtimeEmissionVerified": false
+}

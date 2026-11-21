@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../modules/CaveSharp-OS/Creatures/CreatureSnapshot.cs" Link="CreatureSnapshot.cs" />
+    <Compile Include="../../modules/CaveSharp-OS/Telemetry/TelemetrySnapshot.cs" Link="TelemetrySnapshot.cs" />
+    <Compile Include="../../modules/CaveSharp-OS/Telemetry/SnapshotContractBuilder.cs" Link="SnapshotContractBuilder.cs" />
+    <Compile Include="../../modules/CaveSharp-OS/Telemetry/ContractTelemetryEmitter.cs" Link="ContractTelemetryEmitter.cs" />
+    <Compile Include="../../modules/CaveSharp-OS/Telemetry/AtomicFileSnapshotTransport.cs" Link="AtomicFileSnapshotTransport.cs" />
+    <Compile Include="../../modules/CaveSharp-OS/Telemetry/ContractTelemetryOptions.cs" Link="ContractTelemetryOptions.cs" />
+    <Compile Include="../../modules/CaveSharp-OS/Telemetry/WorldCatalog.cs" Link="WorldCatalog.cs" />
+  </ItemGroup>
+</Project>

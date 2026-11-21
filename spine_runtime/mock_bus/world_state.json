@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0.0",
+  "worldId": "renzoverse.mock.cave",
+  "worldVersion": "0.1.0",
+  "name": "Mock Cave",
+  "description": "Deterministic fixture world for Spine contract tests.",
+  "regions": [
+    {
+      "regionId": "region.mock.entrance",
+      "name": "Cave Entrance"
+    },
+    {
+      "regionId": "region.mock.deep-cave",
+      "name": "Deep Cave",
+      "parentRegionId": "region.mock.entrance"
+    }
+  ],
+  "entityTypes": [
+    {
+      "entityTypeId": "creature.tunnel-rat",
+      "name": "Tunnel Rat"
+    },
+    {
+      "entityTypeId": "creature.stone-crawler",
+      "name": "Stone Crawler"
+    }
+  ]
+}
